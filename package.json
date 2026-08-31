@@ -1,6 +1,6 @@
 {
   "name": "dsh-enter-shortcuts",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Keyboard shortcuts for the DSH Web conversation composer",
   "private": true,
   "license": "MIT",
@@ -11,6 +11,11 @@
     "./client": "./lib/client.js",
     "./package.json": "./package.json"
   },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "README.md"
+  ],
   "dsh": {
     "client": {
       "platform": "web",

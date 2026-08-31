@@ -13,8 +13,9 @@
 
 - 开关默认关闭。
 - 插件会避开中文输入法正在组词时的 Enter。
-- 换行使用真实换行字符，不会插入字面量 `\\n`。
-- 发送操作交给 DSH 原生 Composer 处理，因此 Agent 思考/运行中会保留 DSH 默认的排队语义。
+- 适配当前 DSH Web 的 Lexical Composer（`[data-composer-input]`），旧版 `textarea` 仍兼容。
+- 换行走 DSH 原生 Shift+Enter，不会插入字面量 `\\n`，也不破坏引用芯片。
+- 发送始终映射为原生普通 Enter，不映射为原生 Ctrl/Cmd+Enter。Agent 思考/运行中走 DSH 默认排队（queue），不会当成插话（steer）。
 - Shift+Enter 始终交给 DSH 原生处理，不受本插件影响。
 - 开关状态保存在当前浏览器页面运行期间；刷新页面或重启 DSH 后恢复为关闭。
 
@@ -30,37 +31,23 @@ README.md
 
 ## 安装到 DSH Web Profile
 
-### 1. 将插件放入 Profile 依赖
+源码目录：`D:\DeepSeek\tpd\dsh-enter-shortcuts`。这个包只声明 `dsh.client`，没有 `dsh.bundle`，所以 `dsh plugin add` 只会装依赖，还要自己写 patch 行。
 
-在 `~/.dsh/profiles/web/package.json` 的 `dependencies` 中加入：
-
-```json
-"dsh-enter-shortcuts": "github:<你的 GitHub 用户名>/<你的仓库名>#subdirectory=dsh-enter-shortcuts"
-```
-
-如果插件单独放在一个仓库根目录，则使用：
-
-```json
-"dsh-enter-shortcuts": "github:<你的 GitHub 用户名>/<你的仓库名>"
-```
-
-也可以使用本地目录：
-
-```json
-"dsh-enter-shortcuts": "file:/绝对路径/dsh-enter-shortcuts"
-```
-
-### 2. 安装依赖
-
-在 Profile 目录执行：
+### 1. 安装依赖
 
 ```bash
-pnpm install
+dsh plugin --profile web add D:\DeepSeek\tpd\dsh-enter-shortcuts
 ```
 
-### 3. 加入 Profile composition patch
+Windows 上 `file:` 依赖通常是拷贝。改完本目录后要再执行一次上面的命令，或改用：
 
-编辑 `~/.dsh/profiles/web/cordis.patch.yml`，加入：
+```bash
+dsh plugin --profile web add link:D:\DeepSeek\tpd\dsh-enter-shortcuts
+```
+
+### 2. 加入 Profile composition patch
+
+编辑 `$DSH_HOME/profiles/web/cordis.patch.yml`（本机一般是 `C:\Users\cjzheng\.dsh\profiles\web\cordis.patch.yml`），加入：
 
 ```yaml
 - insert:
@@ -70,9 +57,9 @@ pnpm install
 
 如果已有一个 `insert` 项，把插件条目放入同一个 `insert` 列表即可。
 
-### 4. 重启 DSH Web
+### 3. 重启 DSH Web
 
-这个插件属于静态 Web Client 模块，首次安装或更新后需要重启 DSH Web/CLI；之后刷新页面即可验证。
+这个插件属于静态 Web Client 模块，首次安装或更新后需要重启 DSH Web/CLI，然后硬刷新页面。
 
 ## 从压缩包安装
 
@@ -84,6 +71,6 @@ pnpm install
 
 - `[data-composer-card]`
 - `[data-input-scroll]`
-- `textarea[data-phase]`
+- `[data-composer-input]`（当前 Lexical contenteditable；旧版 `textarea[data-phase]` 仍兼容）
 
-插件通过事件捕获阶段处理键盘事件，并在停止/卸载时移除监听器、按钮和样式。
+插件在捕获阶段拦截 Enter / Ctrl+Enter / Ctrl+J，再把换行和发送交回 DSH 原生快捷键（Shift+Enter 换行、普通 Enter 发送）。发送不带 Ctrl/Meta，因此繁忙态入队而不是插话。停止/卸载时移除监听器、按钮和样式。
