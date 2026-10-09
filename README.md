@@ -31,7 +31,7 @@ README.md
 
 ## 安装到 DSH Web Profile
 
-源码目录：`D:\DeepSeek\tpd\dsh-enter-shortcuts`。这个包只声明 `dsh.client`，没有 `dsh.bundle`，所以 `dsh plugin add` 只会装依赖，还要自己写 patch 行。
+源码目录：`D:\DeepSeek\tpd\dsh-enter-shortcuts`。本包声明 `dsh.client` 和 `dsh.bundle.patch`，自带加载补丁，可在插件管理页显示并管理启用状态。
 
 ### 1. 安装依赖
 
@@ -45,21 +45,17 @@ Windows 上 `file:` 依赖通常是拷贝。改完本目录后要再执行一次
 dsh plugin --profile web add link:D:\DeepSeek\tpd\dsh-enter-shortcuts
 ```
 
-### 2. 加入 Profile composition patch
+### 2. 启用 Profile bundle
 
-编辑 `$DSH_HOME/profiles/web/cordis.patch.yml`（本机一般是 `C:\Users\cjzheng\.dsh\profiles\web\cordis.patch.yml`），加入：
+通过 `dsh plugin add` 登记 bundle 后，可在插件管理页控制启用状态。手动配置时，把 `dsh-enter-shortcuts` 加入 `$DSH_HOME/profiles/web/package.json` 的 `dsh.profile.bundles` 列表；加载条目 `ui-enter-shortcuts` 由包自带的 `cordis.patch.yml` 提供。
 
-```yaml
-- insert:
-    - id: ui-enter-shortcuts
-      name: dsh-enter-shortcuts
-```
+**旧配置迁移：**从 Profile 用户 `cordis.patch.yml` 的 `insert` 列表中移除原有的 `ui-enter-shortcuts` 条目，避免重复插入。后续的禁用或配置覆盖仍可使用原条目 id。
 
-如果已有一个 `insert` 项，把插件条目放入同一个 `insert` 列表即可。
+### 3. 应用配置与刷新
 
-### 3. 重启 DSH Web
+Profile 使用 `patchReload: live` 时，bundle 列表与用户补丁变更会触发配置重载；本次迁移保留相同的插件 id 和模块名，不修改快捷键实现。刷新插件管理页面以读取新列表。
 
-这个插件属于静态 Web Client 模块，首次安装或更新后需要重启 DSH Web/CLI，然后硬刷新页面。
+首次安装或修改静态 Web Client 模块后，如果没有运行对应的开发构建与重载机制，需要重启 DSH Web/CLI，再刷新页面。
 
 ## 从压缩包安装
 

@@ -1,0 +1,4 @@
+# Bundle-owned entry; keep the existing id and module name during migration.
+- insert:
+    - id: ui-enter-shortcuts
+      name: dsh-enter-shortcuts

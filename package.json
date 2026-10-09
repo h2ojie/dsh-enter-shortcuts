@@ -14,12 +14,19 @@
   "files": [
     "lib/index.js",
     "lib/client.js",
+    "cordis.patch.yml",
     "README.md"
   ],
   "dsh": {
     "client": {
       "platform": "web",
       "immediately": true
+    },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
     }
+  },
+  "scripts": {
+    "test": "node --test"
   }
 }
